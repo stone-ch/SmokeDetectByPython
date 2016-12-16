@@ -1,0 +1,14 @@
+# *^_^* coding:utf-8 *^_^*
+"""
+把图片统一输出为某一尺寸，或者原视频的n倍.
+也可以截取视频中的某一区域。
+保存格式为avi
+"""
+
+from __future__ import print_function
+
+__author__ = 'stone'
+__date__ = '16-1-15'
+
+import cv2
+import numpy as np
