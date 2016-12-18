@@ -1,7 +1,15 @@
 # *^_^* coding:utf-8 *^_^*
+"""
+Please note, this code is only for python 3+.
+If you are using python 2+, please modify the code accordingly.
+
+Classify smoke images by CNN:
+    1. Only binary images.
+    2. Input images 28*28*1 --> Level 1: output 28*28*32 --> pooling 1: 14*14*32
+       --> Level 2: output 14*14*64 --> pooling 2: output 7*7*64 --> ANN: result
+"""
 
 from __future__ import print_function
-# import cv2
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -10,11 +18,6 @@ import random
 
 __author__ = 'stone'
 __date__ = '16-11-19'
-
-"""
-Please note, this code is only for python 3+.
-If you are using python 2+, please modify the code accordingly.
-"""
 
 
 def load_images(path):
@@ -30,7 +33,6 @@ def load_images(path):
 
 
 # number 1 to 10 data
-# mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
 
 def compute_accuracy(v_xs, v_ys):
@@ -107,11 +109,10 @@ if __name__ == "__main__":
     sess = tf.Session()
     # important step
     sess.run(tf.initialize_all_variables())
-
-    train_smoke_images = load_images("/home/st/Code/FlameSmokeDetect/medias/PictureForCNN/smoke_train28x28/")
-    train_none_smoke_images = load_images("/home/st/Code/FlameSmokeDetect/medias/PictureForCNN/none_smoke_train28x28/")
-    test_smoke_images = load_images("/home/st/Code/FlameSmokeDetect/medias/PictureForCNN/smoke_test28x28/")
-    test_none_smoke_images = load_images("/home/st/Code/FlameSmokeDetect/medias/PictureForCNN/none_smoke_test28x28/")
+    train_smoke_images = load_images("/home/stone/Code/FlameSmokeDetect/medias/PictureForCNN/smoke_train28x28/")
+    train_none_smoke_images = load_images("/home/stone/Code/FlameSmokeDetect/medias/PictureForCNN/none_smoke_train28x28/")
+    test_smoke_images = load_images("/home/stone/Code/FlameSmokeDetect/medias/PictureForCNN/smoke_test28x28/")
+    test_none_smoke_images = load_images("/home/stone/Code/FlameSmokeDetect/medias/PictureForCNN/none_smoke_test28x28/")
     total_train_images_list = []
     total_train_labels_list = []
     total_test_images_list = []
@@ -139,7 +140,7 @@ if __name__ == "__main__":
         batch_ys = total_train_labels[i:i+50]
         sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
         if i % 5 == 0:
-            print(i, end='')
+            #print(i, end='')
             print(compute_accuracy(
                 total_test_images, total_test_labels))
 
