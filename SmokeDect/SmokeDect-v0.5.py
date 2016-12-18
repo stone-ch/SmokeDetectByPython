@@ -26,7 +26,7 @@ def load_images(path):
         for filename in filenames:
             img = cv2.imread(path + filename, 0)
             ret, img2 = cv2.threshold(img, 125, 1, cv2.THRESH_BINARY)
-            #cv2.imshow("img", img)
+            # cv2.imshow("img", img)
             img_flat = np.reshape(img2, (1, -1))
             img_list.append(img_flat)
     return img_list
@@ -38,7 +38,7 @@ def load_images(path):
 def compute_accuracy(v_xs, v_ys):
     global prediction
     y_pre = sess.run(prediction, feed_dict={xs: v_xs, keep_prob: 1})
-    #print(y_pre)
+    # print(y_pre)
     correct_prediction = tf.equal(tf.argmax(y_pre, 1), tf.argmax(v_ys, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     result = sess.run(accuracy, feed_dict={xs: v_xs, ys: v_ys, keep_prob: 1})
@@ -63,7 +63,12 @@ def conv2d(x, W):
 
 def max_pool_2x2(x):
     # stride [1, x_movement, y_movement, 1]
-    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    return tf.nn.max_pool(
+        x,
+        ksize=[1, 2, 2, 1],
+        strides=[1, 2, 2, 1],
+        padding='SAME'
+    )
 
 
 if __name__ == "__main__":
@@ -73,7 +78,7 @@ if __name__ == "__main__":
     keep_prob = tf.placeholder(tf.float32)
     x_image = tf.reshape(xs, [-1, 28, 28, 1])
     # print(x_image.shape)  # [n_samples, 28,28,1]
-    #print(type(x_image))
+    # print(type(x_image))
 
     # conv1 layer #
     W_conv1 = weight_variable([5, 5, 1, 32])  # patch 5x5, in size 1, out size 32
