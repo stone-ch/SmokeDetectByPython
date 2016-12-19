@@ -87,18 +87,11 @@ if __name__ == "__main__":
     h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)  # output size 16x12x64
     h_pool2 = max_pool_2x2(h_conv2)  # output size 8x6x64
 
-    # conv3 layer
     W_conv3 = weight_variable([5, 5, 96, 128])
     b_conv3 = bias_variable([128])
     h_conv3 = tf.nn.relu(conv2d(h_pool2, W_conv3) + b_conv3)
-    h_pool3 = max_pool_2x2(h_conv3)    # output size 8x6x128
+    h_pool3 = max_pool_2x2(h_conv3)    # output size 7x7x128
 
-    # # conv4 layer
-    # W_conv4 = weight_variable([5, 5, 128, 256])
-    # b_conv4 = bias_variable([256])
-    # h_conv4 = tf.nn.relu(conv2d(h_pool3, W_conv4) + b_conv4)
-    # h_pool4 = max_pool_2x2(h_conv4)    # output size 4x3x256
-    
     # fc1 layer #
     W_fc1 = weight_variable([3*4*128, 1024])
     b_fc1 = bias_variable([1024])
@@ -122,20 +115,20 @@ if __name__ == "__main__":
     sess = tf.Session()
     # important step
     sess.run(tf.initialize_all_variables())
-    train_smoke_images = load_images("../medias/PictureForCNN/32x24/smoke_train_32x24/")
-    train_none_smoke_images = load_images("../medias/PictureForCNN/32x24/none_smoke_train_32x24/")
-    test_smoke_images = load_images("../medias/PictureForCNN/32x24/smoke_test_32x24/")
-    test_none_smoke_images = load_images("../medias/PictureForCNN/32x24/none_smoke_test_32x24/")
-    total_train_images_list = []
-    total_train_labels_list = []
+    # train_smoke_images = load_images("../medias/PictureForCNN/32x24/smoke_train_32x24/")
+    # train_none_smoke_images = load_images("../medias/PictureForCNN/32x24/none_smoke_train_32x24/")
+    test_smoke_images = load_images("../medias/PictureForCNN/32x24/st/")
+    test_none_smoke_images = load_images("../medias/PictureForCNN/32x24/nst/")
+    # total_train_images_list = []
+    # total_train_labels_list = []
     total_test_images_list = []
     total_test_labels_list = []
-    for i in range(len(train_smoke_images)):
-        total_train_images_list.extend(np.array(train_smoke_images[i], dtype=np.float32))
-        total_train_labels_list.append([1, 0])
-    for i in range(len(train_none_smoke_images)):
-        total_train_images_list.extend(np.array(train_none_smoke_images[i], dtype=np.float32))
-        total_train_labels_list.append([0, 1])
+    # for i in range(len(train_smoke_images)):
+    #     total_train_images_list.extend(np.array(train_smoke_images[i], dtype=np.float32))
+    #     total_train_labels_list.append([1, 0])
+    # for i in range(len(train_none_smoke_images)):
+    #     total_train_images_list.extend(np.array(train_none_smoke_images[i], dtype=np.float32))
+    #     total_train_labels_list.append([0, 1])
 
     for i in range(len(test_smoke_images)):
         total_test_images_list.extend(test_smoke_images[i])
@@ -144,35 +137,37 @@ if __name__ == "__main__":
         total_test_images_list.extend(test_none_smoke_images[i])
         total_test_labels_list.append([0, 1])
 
-    total_train_images = np.array(total_train_images_list, dtype=np.float32)
-    total_train_labels = np.array(total_train_labels_list, dtype=np.float32)
+    # total_train_images = np.array(total_train_images_list, dtype=np.float32)
+    # total_train_labels = np.array(total_train_labels_list, dtype=np.float32)
     total_test_images = np.array(total_test_images_list, dtype=np.float32)
     total_test_labels = np.array(total_test_labels_list, dtype=np.float32)
 
-    round_num = 2
+    round_num = 1
     fp = open("log.txt", "w")
     saver = tf.train.Saver()
-    for index in range(502):
+    saver.restore(sess, "/home/st/Desktop/saver")
+    for index in range(1):
         # batch_xs, batch_ys = mnist.train.next_batch(100)
         batch_xs = []
         batch_ys = []
-        for i in range(round_num):
-            rand_num = random.randint(0, len(train_smoke_images) + len(train_none_smoke_images) - 1)
-            batch_xs.append(total_train_images[rand_num])
-            batch_ys.append(total_train_labels[rand_num])
+        # for i in range(round_num):
+        #     rand_num = random.randint(0, len(train_smoke_images) + len(train_none_smoke_images) - 1)
+        #     batch_xs.append(total_train_images[rand_num])
+        #     batch_ys.append(total_train_labels[rand_num])
         # print(len(batch_xs))
         # p = sess.run(prediction, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
         # print("p = {}".format(p))
-        sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
+        # sess.run(train_step, feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
         if index % round_num == 0:
             print("{} ".format(index), end='')
             p = compute_accuracy(
                 total_test_images, total_test_labels)
             print(p)
-            fp.writelines("{}: {}\n".format(index ,p))
-    fp.close()
-    saver.save(sess, "/home/st/Desktop/saver")
-                
+            fp.writelines("{}: {}\n".format(index, p))
+    
+
+
+    
         # p = sess.run(tf.shape(ys), feed_dict={xs: batch_xs, ys: batch_ys, keep_prob: 0.5})
         # print(p)
     #batch_xs = total_train_images[i:i+10]
