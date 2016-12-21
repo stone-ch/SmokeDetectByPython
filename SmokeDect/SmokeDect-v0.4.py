@@ -15,7 +15,7 @@ CANDIDATE_BLOCK_SIZE = 20
 
 if __name__ == "__main__":
     cap = cv2.VideoCapture(
-        "../medias/myVideo/640x480/smoke3.avi")
+        "../medias/myVideo/640x480/smoke5.avi")
     ret, start_frame = cap.read()
     start_gray_frame = cv2.cvtColor(start_frame, cv2.COLOR_BGR2GRAY)
     fgbg = cv2.createBackgroundSubtractorMOG2(
@@ -32,9 +32,14 @@ if __name__ == "__main__":
             print("The End!")
             break
 
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
-        # cv2.imshow("gray_frame", gray_frame)
+        smooth_kernel = np.ones((5, 5), np.float32)/25
+        smooth_frame = cv2.filter2D(frame, -1, smooth_kernel)
+        
+        gray_frame = cv2.cvtColor(smooth_frame, cv2.COLOR_BGR2GRAY)
+        hsv_frame = cv2.cvtColor(smooth_frame, cv2.COLOR_BGR2HSV_FULL)
+        if DEBUG:
+            cv2.imshow("gray_frame", gray_frame)
+            cv2.imshow("hsv_frame", hsv_frame)
 
         # GMM
         fgmask = fgbg.apply(gray_frame)
@@ -81,8 +86,9 @@ if __name__ == "__main__":
                         elif (frame_count > 0):
                             HSV_V_50_block = HSV_V_all_block_ndarray[:frame_count, m/20]
 
-                        if (np.average(HSV_V_50_block) - average_V > 0):
+                        if (np.average(HSV_V_50_block) - average_V < 5):
                             cv2.rectangle(frame, (m, n), (m+block_width, n+block_height), (0, 0, 255))
+                            
 
         # cv2.imshow("fgmask", fgmask)
         cv2.imshow("frame", frame)

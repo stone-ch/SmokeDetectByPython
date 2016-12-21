@@ -149,10 +149,10 @@ if __name__ == "__main__":
     total_test_images = np.array(total_test_images_list, dtype=np.float32)
     total_test_labels = np.array(total_test_labels_list, dtype=np.float32)
 
-    round_num = 2
+    round_num = 100
     fp = open("log.txt", "w")
     saver = tf.train.Saver()
-    for index in range(502):
+    for index in range(100002):
         # batch_xs, batch_ys = mnist.train.next_batch(100)
         batch_xs = []
         batch_ys = []

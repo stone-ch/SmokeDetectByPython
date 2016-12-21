@@ -85,12 +85,12 @@ if __name__ == "__main__":
     prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
     sess = tf.Session()
     saver = tf.train.Saver()
-    saver.restore(sess, "/home/st/Desktop/saver")
+    saver.restore(sess, "saver")
     sess.run(tf.initialize_all_variables())
 
 
     cap = cv2.VideoCapture(
-        "../medias/myVideo/640x480/smoke3.avi")
+        "../medias/myVideo/640x480/smoke1.avi")
     ret, start_frame = cap.read()
     start_gray_frame = cv2.cvtColor(start_frame, cv2.COLOR_BGR2GRAY)
     fgbg = cv2.createBackgroundSubtractorMOG2(
@@ -100,16 +100,21 @@ if __name__ == "__main__":
     height, width = start_frame.shape[:2]
     frame_count = 0
 
+    # save all blocks of the frame in HSV color space
     HSV_V_all_block = []
     while 1:
         ret, frame = cap.read()
         if frame is None:
             print("The End!")
             break
-
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV_FULL)
-        # cv2.imshow("gray_frame", gray_frame)
+        smooth_kernel = np.ones((5, 5), np.float32)/25
+        smooth_frame = cv2.filter2D(frame, -1, smooth_kernel)
+        
+        gray_frame = cv2.cvtColor(smooth_frame, cv2.COLOR_BGR2GRAY)
+        hsv_frame = cv2.cvtColor(smooth_frame, cv2.COLOR_BGR2HSV_FULL)
+        if DEBUG:
+            cv2.imshow("gray_frame", gray_frame)
+            cv2.imshow("hsv_frame", hsv_frame)
 
         # GMM
         fgmask = fgbg.apply(gray_frame)
@@ -118,6 +123,14 @@ if __name__ == "__main__":
         fgmask = cv2.erode(fgmask, kernel2)
         fgmask = cv2.dilate(fgmask, kernel1)
         ret, fgmask_bin = cv2.threshold(fgmask, 0, 1, cv2.THRESH_BINARY)
+        if DEBUG:
+            ret, fgmask_bin_show = cv2.threshold(
+                fgmask,
+                0,
+                255,
+                cv2.THRESH_BINARY
+            )
+            cv2.imshow("fgmask_bin", fgmask_bin_show)
 
         block_width = width/CANDIDATE_BLOCK_SIZE
         block_height = height/CANDIDATE_BLOCK_SIZE
@@ -158,18 +171,22 @@ if __name__ == "__main__":
 
                         if (np.average(HSV_V_50_block) - average_V > 0):
                             cv2.rectangle(frame, (m, n), (m+block_width, n+block_height), (0, 0, 255))
-                            candidate_block = frame[m:m+block_width, n:n+block_height]
+                            candidate_block = frame[n:(n+block_height), m:(m+block_width)]
                             candidate_block2 = cv2.cvtColor(candidate_block, cv2.COLOR_BGR2GRAY)
                             ret, candidate_block2 = cv2.threshold(candidate_block2, 125, 1, cv2.THRESH_BINARY)
                             candidate_block2_flat = np.reshape(candidate_block2, (1, -1))
-                            print("{},{},{}".format(frame_count, n, m))
-                            cv2.waitKey(0)
+                            # print("{},{},{}".format(frame_count, n, m))
+                            # cv2.waitKey(10)
                             try:
-                                print(sess.run(prediction, feed_dict={xs: candidate_block2_flat, keep_prob:1}))
+                                result = sess.run(prediction, feed_dict={xs: candidate_block2_flat, keep_prob:1})
+                                # print("CNN")
+                                if result[0][0] > result[0][1]:
+                                    print("find smoke at: frame{}({},{})".format(frame_count, n, m))
+                                    cv2.rectangle(frame, (m, n), (m+block_width, n+block_height), (255, 255, 255))
                             except:
-                                pass
+                                print("Bug{}".format(frame_count))
                                 
-                            cv2.waitKey(0)
+                            # cv2.waitKey(0)
 
         # cv2.imshow("fgmask", fgmask)
         cv2.imshow("frame", frame)
